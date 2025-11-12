@@ -37,16 +37,16 @@ function lastPositionSnake() {
 }
 
 function verifyLimit(value) {
-  if (firstPositionSnake() + value < 0) return true;
-  if (firstPositionSnake() + value > maxTableSize) return true;
+  if (lastPositionSnake() + value < 0) return true;
+  if (lastPositionSnake() + value > maxTableSize) return true;
   if (
-    leftWall.includes(firstPositionSnake()) &&
-    rightWall.includes(firstPositionSnake() + value)
+    leftWall.includes(lastPositionSnake()) &&
+    rightWall.includes(lastPositionSnake() + value)
   )
     return true;
   if (
-    rightWall.includes(firstPositionSnake()) &&
-    leftWall.includes(firstPositionSnake() + value)
+    rightWall.includes(lastPositionSnake()) &&
+    leftWall.includes(lastPositionSnake() + value)
   )
     return true;
   return false;
@@ -98,25 +98,17 @@ function repositionFood() {
 function snakeWalk(direction) {
   lastKeyDown = direction;
 
-  console.log("posição inicial:", snakePosition);
-
   if (verifyLimit(keyAction[direction])) {
     alert(`Parece que você bateu em uma parede! você fez: ${points} pontos!`);
     return restartGame();
   }
 
-  if (snakePosition.length === 1) {
-    snakePosition = [firstPositionSnake() + keyAction[direction]];
-  } else {
-    snakePosition.push(lastPositionSnake() + keyAction[direction]);
-    snakePosition.shift();
-  }
+  snakePosition.push(lastPositionSnake() + keyAction[direction]);
+  snakePosition.shift();
 
   const grids = document.querySelectorAll(".table > div");
 
   if (grids.length === 0) return;
-
-  console.log("posição da cobra depois de andar:", snakePosition);
 
   grids.forEach((item, i) => {
     item.classList.remove("snake");
@@ -125,9 +117,6 @@ function snakeWalk(direction) {
       item.classList.add("snake");
     }
   });
-
-  console.log("ultima posição da cobra:", lastPositionSnake());
-  console.log("posição da comida atual:", foodPosition);
 
   if (lastPositionSnake() === foodPosition) {
     snakePosition.unshift(foodPosition);
