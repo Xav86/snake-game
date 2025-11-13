@@ -1,4 +1,5 @@
 const table = document.querySelector(".table");
+const pointsPlacar = document.querySelector("#points");
 const intervalRow = 15;
 const tableSize = intervalRow * intervalRow;
 const center = Math.floor(tableSize / 2);
@@ -10,6 +11,8 @@ let points = 0;
 let snakePosition = [initialSnakePosition];
 let foodPosition = initialFoodPosition;
 let lastKeyDown = "downArrow";
+
+let walkTimeOut;
 
 const keyAction = {
   upArrow: -15,
@@ -41,6 +44,9 @@ function firstPositionSnake() {
 }
 function lastPositionSnake() {
   return snakePosition[snakePosition.length - 1];
+}
+function beforeLastPositionSnake() {
+  return snakePosition[snakePosition.length - 2];
 }
 
 function verifyLimit(value) {
@@ -76,7 +82,7 @@ function createTable() {
   for (let i = 0; i <= maxTableSize; i++) {
     const div = document.createElement("div");
 
-    div.textContent = i;
+    // div.textContent = i;
     if (i % 2 === 0) div.classList.add("tapete");
 
     if (i === firstPositionSnake()) div.classList.add("snake");
@@ -100,16 +106,47 @@ function repositionFood() {
     }
   });
 
+  pointsPlacar.textContent = "0";
   points++;
+  pointsPlacar.textContent = points;
+}
+
+function verifyDeath(direction) {
+  if (verifyLimit(keyAction[direction])) {
+    alert(`Parece que você bateu em uma parede! você fez: ${points} pontos!`);
+    restartGame();
+    return true;
+  }
+
+  const snakeBody = [...snakePosition];
+  if (snakePosition.length > 1) snakeBody.pop();
+
+  if (
+    snakeBody.includes(lastPositionSnake() + keyAction[direction]) &&
+    snakePosition.length > 4
+  ) {
+    alert(`Parece que você bateu em si mesmo! você fez: ${points} pontos!`);
+    restartGame();
+    return true;
+  }
+
+  return false;
+}
+
+function notForBack(direction) {
+  if (preventKey[direction] === lastKeyDown) return true;
+  return false;
 }
 
 function snakeWalk(direction) {
-  lastKeyDown = direction;
+  stopWalk();
 
-  if (verifyLimit(keyAction[direction])) {
-    alert(`Parece que você bateu em uma parede! você fez: ${points} pontos!`);
-    return restartGame();
+  if (snakePosition.length !== 1) {
+    if (notForBack(direction)) return;
   }
+  if (verifyDeath(direction)) return;
+
+  lastKeyDown = direction;
 
   snakePosition.push(lastPositionSnake() + keyAction[direction]);
   snakePosition.shift();
@@ -130,6 +167,11 @@ function snakeWalk(direction) {
     snakePosition.unshift(foodPosition);
     repositionFood();
   }
+
+  walkTimeOut = setTimeout(() => {
+    console.log(200 - points * 5);
+    return snakeWalk(lastKeyDown);
+  }, 200 - points * 0.5);
 }
 
 function handleKey(event) {
@@ -157,9 +199,16 @@ function stopReadKey() {
   document.removeEventListener("keydown", handleKey);
 }
 
+function stopWalk() {
+  clearTimeout(walkTimeOut);
+}
+
 function restartGame() {
   table.innerHTML = "";
+  pointsPlacar.textContent = "0";
   stopReadKey();
+
+  stopWalk();
 
   points = 0;
   snakePosition = [initialSnakePosition];
