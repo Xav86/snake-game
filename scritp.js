@@ -18,6 +18,13 @@ const keyAction = {
   rightArrow: +1,
 };
 
+const preventKey = {
+  upArrow: "downArrow",
+  downArrow: "upArrow",
+  leftArrow: "rightArrow",
+  rightArrow: "leftArrow",
+};
+
 const maxTableSize = tableSize - 1;
 const rightWall = [];
 const leftWall = [];
@@ -53,13 +60,14 @@ function verifyLimit(value) {
 }
 
 function randomPosition() {
-  // vai quebrar quando o cara ganhar
   const selectPosition = Math.floor(Math.random() * tableSize);
 
-  if (
-    firstPositionSnake() === selectPosition ||
-    selectPosition === foodPosition
-  )
+  if (snakePosition.length === tableSize) {
+    alert(`Você venceu! pontuação maxima alcançada de: ${points}`);
+    return restartGame();
+  }
+
+  if (snakePosition.includes(selectPosition) || selectPosition === foodPosition)
     return randomPosition();
   return selectPosition;
 }
