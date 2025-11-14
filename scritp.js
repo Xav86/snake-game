@@ -1,5 +1,28 @@
 const table = document.querySelector(".table");
 const pointsPlacar = document.querySelector("#points");
+
+const rowSize = 15;
+const columnSize = 15;
+const boardSize = rowSize * columnSize;
+const boardCenter = {
+  row: Math.floor(rowSize / 2),
+  column: Math.floor(columnSize / 2),
+};
+
+const inicialSnakeBodyPosition = [
+  { row: boardCenter.row, column: boardCenter.column - 3 },
+  { row: boardCenter.row, column: boardCenter.column - 4 },
+];
+const inicialBoardFoodPosition = {
+  row: boardCenter.row,
+  column: boardCenter.column + 3,
+};
+
+let snakeBodyPosition = inicialSnakeBodyPosition;
+let boardFoodPosition = inicialBoardFoodPosition;
+
+///////////////////////////////////////
+
 const intervalRow = 15;
 const tableSize = intervalRow * intervalRow;
 const center = Math.floor(tableSize / 2);
@@ -66,43 +89,80 @@ function verifyLimit(value) {
 }
 
 function randomPosition() {
-  const selectPosition = Math.floor(Math.random() * tableSize);
+  const rowSelectPosition = Math.floor(Math.random() * rowSize);
+  const columnSelectPosition = Math.floor(Math.random() * columnSize);
 
-  if (snakePosition.length === tableSize) {
+  if (snakeBodyPosition.length === boardSize) {
     alert(`Você venceu! pontuação maxima alcançada de: ${points}`);
     return restartGame();
   }
 
-  if (snakePosition.includes(selectPosition) || selectPosition === foodPosition)
+  for (const item of snakeBodyPosition) {
+    if (
+      item.row === rowSelectPosition &&
+      item.column === columnSelectPosition
+    ) {
+      return randomPosition();
+    }
+  }
+
+  if (
+    boardFoodPosition.row === rowSelectPosition &&
+    boardFoodPosition.column === columnSelectPosition
+  )
     return randomPosition();
-  return selectPosition;
+
+  return { row: rowSelectPosition, column: columnSelectPosition };
 }
 
 function createTable() {
-  for (let i = 0; i <= maxTableSize; i++) {
-    const div = document.createElement("div");
+  let grid = [];
+  for (r = 0; r < 15; r++) {
+    let row = [];
 
-    // div.textContent = i;
-    if (i % 2 === 0) div.classList.add("tapete");
+    for (c = 0; c < 15; c++) {
+      row.push({ row: r, col: c });
 
-    if (i === firstPositionSnake()) div.classList.add("snake");
-    if (i === foodPosition) div.classList.add("food");
+      const columElement = document.createElement("div");
+      columElement.classList.add(`r${r}c${c}`);
+      columElement.textContent = `${r},${c}`;
 
-    table.appendChild(div);
+      if ((c + r) % 2 === 0) columElement.classList.add("tapete");
+
+      snakeBodyPosition.forEach((item) => {
+        if (c === item.column && r === item.row)
+          columElement.classList.add("snake");
+      });
+
+      if (c === boardFoodPosition.column && r === boardFoodPosition.row)
+        columElement.classList.add("food");
+
+      table.appendChild(columElement);
+    }
+    grid.push(row);
   }
 }
 
 function repositionFood() {
   const grids = document.querySelectorAll(".table > div");
-
   if (grids.length === 0) return;
+
   const newFoodPosition = randomPosition();
 
-  grids.forEach((item, i) => {
-    item.classList.remove("food");
-    if (i === newFoodPosition) {
+  console.log(newFoodPosition);
+
+  grids.forEach((item) => {
+    // item.classList.remove("food");
+    if (
+      item.classList.contains(
+        `r${newFoodPosition.row}c${newFoodPosition.column}`
+      )
+    ) {
       item.classList.add("food");
-      foodPosition = i;
+      boardFoodPosition = {
+        row: newFoodPosition.row,
+        column: newFoodPosition.column,
+      };
     }
   });
 
@@ -219,7 +279,8 @@ function restartGame() {
 
 async function startGame() {
   createTable();
-  readKey();
+  // setInterval(() => repositionFood(), 50);
+  // readKey();
 }
 
 startGame();
