@@ -21,8 +21,17 @@ const inicialBoardFoodPosition = {
 let snakeBodyPosition = inicialSnakeBodyPosition;
 let boardFoodPosition = inicialBoardFoodPosition;
 
+let points = 0;
+
+const keyAction = {
+  ArrowUp: -1,
+  ArrowDown: +1,
+  ArrowLeft: -1,
+  ArrowRight: +1,
+};
 ///////////////////////////////////////
 
+/*
 const intervalRow = 15;
 const tableSize = intervalRow * intervalRow;
 const center = Math.floor(tableSize / 2);
@@ -30,7 +39,6 @@ const center = Math.floor(tableSize / 2);
 const initialSnakePosition = center - 3;
 const initialFoodPosition = center + 3;
 
-let points = 0;
 let snakePosition = [initialSnakePosition];
 let foodPosition = initialFoodPosition;
 let lastKeyDown = "downArrow";
@@ -54,7 +62,6 @@ const preventKey = {
 const maxTableSize = tableSize - 1;
 const rightWall = [];
 const leftWall = [];
-
 for (i = intervalRow - 1; i <= maxTableSize; i = i + intervalRow) {
   rightWall.push(i);
 }
@@ -87,7 +94,7 @@ function verifyLimit(value) {
     return true;
   return false;
 }
-
+*/
 function randomPosition() {
   const rowSelectPosition = Math.floor(Math.random() * rowSize);
   const columnSelectPosition = Math.floor(Math.random() * columnSize);
@@ -117,10 +124,10 @@ function randomPosition() {
 
 function createTable() {
   let grid = [];
-  for (r = 0; r < 15; r++) {
+  for (r = 0; r < rowSize; r++) {
     let row = [];
 
-    for (c = 0; c < 15; c++) {
+    for (c = 0; c < columnSize; c++) {
       row.push({ row: r, col: c });
 
       const columElement = document.createElement("div");
@@ -141,6 +148,7 @@ function createTable() {
     }
     grid.push(row);
   }
+  console.log(snakeBodyPosition);
 }
 
 function repositionFood() {
@@ -152,7 +160,7 @@ function repositionFood() {
   console.log(newFoodPosition);
 
   grids.forEach((item) => {
-    // item.classList.remove("food");
+    item.classList.remove("food");
     if (
       item.classList.contains(
         `r${newFoodPosition.row}c${newFoodPosition.column}`
@@ -170,7 +178,7 @@ function repositionFood() {
   points++;
   pointsPlacar.textContent = points;
 }
-
+/*
 function verifyDeath(direction) {
   if (verifyLimit(keyAction[direction])) {
     alert(`Parece que você bateu em uma parede! você fez: ${points} pontos!`);
@@ -197,56 +205,70 @@ function notForBack(direction) {
   if (preventKey[direction] === lastKeyDown) return true;
   return false;
 }
-
+*/
 function snakeWalk(direction) {
-  stopWalk();
+  if (snakeBodyPosition.length <= 0) return;
+  // if (verifyDeath(direction)) return;
 
-  if (snakePosition.length !== 1) {
-    if (notForBack(direction)) return;
-  }
-  if (verifyDeath(direction)) return;
+  // lastKeyDown = direction;
 
-  lastKeyDown = direction;
+  if (direction === "ArrowUp" || direction === "ArrowDown")
+    snakeBodyPosition.unshift({
+      row: snakeBodyPosition[0]?.row + keyAction[direction],
+      column: snakeBodyPosition[0].column,
+    });
+  else
+    snakeBodyPosition.unshift({
+      row: snakeBodyPosition[0].row,
+      column: snakeBodyPosition[0]?.column + keyAction[direction],
+    });
 
-  snakePosition.push(lastPositionSnake() + keyAction[direction]);
-  snakePosition.shift();
+  snakeBodyPosition.pop();
 
   const grids = document.querySelectorAll(".table > div");
 
   if (grids.length === 0) return;
 
-  grids.forEach((item, i) => {
+  grids.forEach((item) => {
     item.classList.remove("snake");
 
-    if (snakePosition.includes(i)) {
-      item.classList.add("snake");
-    }
+    const positionItem = {
+      row: Number(item.classList[0].split("c")[0].replace("r", "")),
+      column: Number(item.classList[0].split("r")[1].split("c")[1]),
+    };
+
+    snakeBodyPosition.forEach((snake) => {
+      if (
+        snake.row === positionItem.row &&
+        snake.column === positionItem.column
+      ) {
+        item.classList.add("snake");
+      }
+    });
   });
 
-  if (lastPositionSnake() === foodPosition) {
-    snakePosition.unshift(foodPosition);
+  if (
+    snakeBodyPosition[0].row === boardFoodPosition.row &&
+    snakeBodyPosition[0].column === boardFoodPosition.column
+  ) {
+    snakeBodyPosition.push(boardFoodPosition);
     repositionFood();
   }
-
-  walkTimeOut = setTimeout(() => {
-    console.log(200 - points * 5);
-    return snakeWalk(lastKeyDown);
-  }, 200 - points * 0.5);
 }
 
 function handleKey(event) {
   switch (event.key) {
     case "ArrowUp":
-      snakeWalk("upArrow");
+      snakeWalk("ArrowUp");
       break;
     case "ArrowDown":
-      snakeWalk("downArrow");
+      snakeWalk("ArrowDown");
       break;
     case "ArrowLeft":
-      snakeWalk("leftArrow");
+      snakeWalk("ArrowLeft");
       break;
     case "ArrowRight":
-      snakeWalk("rightArrow");
+      snakeWalk("ArrowRight");
       break;
   }
 }
@@ -258,7 +280,7 @@ function readKey() {
 function stopReadKey() {
   document.removeEventListener("keydown", handleKey);
 }
-
+/*
 function stopWalk() {
   clearTimeout(walkTimeOut);
 }
@@ -276,11 +298,11 @@ function restartGame() {
 
   startGame();
 }
+*/
 
 async function startGame() {
   createTable();
-  // setInterval(() => repositionFood(), 50);
-  // readKey();
+  readKey();
 }
 
 startGame();
