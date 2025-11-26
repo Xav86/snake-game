@@ -22,6 +22,7 @@ let snakeBodyPosition = [...inicialSnakeBodyPosition];
 let boardFoodPosition = inicialBoardFoodPosition;
 
 let points = 0;
+let lastKeyDown = "ArrowRight";
 
 const keyAction = {
   ArrowUp: { row: -1, column: 0 },
@@ -37,50 +38,6 @@ const preventKey = {
   ArrowRight: "ArrowLeft",
 };
 
-let lastKeyDown = "ArrowRight";
-
-///////////////////////////////////////
-
-/*
-const intervalRow = 15;
-const tableSize = intervalRow * intervalRow;
-const center = Math.floor(tableSize / 2);
-
-const initialSnakePosition = center - 3;
-const initialFoodPosition = center + 3;
-
-let snakePosition = [initialSnakePosition];
-let foodPosition = initialFoodPosition;
-
-let walkTimeOut;
-
-const keyAction = {
-  upArrow: -15,
-  downArrow: +15,
-  leftArrow: -1,
-  rightArrow: +1,
-};
-
-const maxTableSize = tableSize - 1;
-const rightWall = [];
-const leftWall = [];
-for (i = intervalRow - 1; i <= maxTableSize; i = i + intervalRow) {
-  rightWall.push(i);
-}
-for (i = 0; i <= tableSize - intervalRow; i = i + intervalRow) {
-  leftWall.push(i);
-}
-
-function firstPositionSnake() {
-  return snakePosition[0];
-}
-function lastPositionSnake() {
-  return snakePosition[snakePosition.length - 1];
-}
-function beforeLastPositionSnake() {
-  return snakePosition[snakePosition.length - 2];
-}
-*/
 function verifyLimit(value, direction) {
   if (direction === "ArrowUp" || direction === "ArrowDown") {
     if (
@@ -102,7 +59,7 @@ function randomPosition() {
   const rowSelectPosition = Math.floor(Math.random() * rowSize);
   const columnSelectPosition = Math.floor(Math.random() * columnSize);
 
-  if (snakeBodyPosition.length === boardSize) {
+  if (snakeBodyPosition.length >= boardSize) {
     alert(`Você venceu! pontuação maxima alcançada de: ${points}`);
     return restartGame();
   }
@@ -205,13 +162,6 @@ function verifyDeath(direction) {
   return false;
 }
 
-/*
-function notForBack(direction) {
-  if (preventKey[direction] === lastKeyDown) return true;
-  return false;
-}
-*/
-
 function snakeWalk(direction) {
   if (snakeBodyPosition.length <= 0) return;
   if (verifyDeath(direction)) return;
@@ -285,12 +235,6 @@ function readKey() {
 function stopReadKey() {
   document.removeEventListener("keydown", handleKey);
 }
-
-/*
-function stopWalk() {
-  clearTimeout(walkTimeOut);
-}
-*/
 
 function restartGame() {
   table.innerHTML = "";
