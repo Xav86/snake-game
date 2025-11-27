@@ -24,6 +24,8 @@ let boardFoodPosition = inicialBoardFoodPosition;
 let points = 0;
 let lastKeyDown = "ArrowRight";
 
+let gameLoop;
+
 const keyAction = {
   ArrowUp: { row: -1, column: 0 },
   ArrowDown: { row: 1, column: 0 },
@@ -92,7 +94,7 @@ function createTable() {
 
       const columElement = document.createElement("div");
       columElement.classList.add(`r${r}c${c}`);
-      columElement.textContent = `${r},${c}`;
+      // columElement.textContent = `${r},${c}`;
 
       if ((c + r) % 2 === 0) columElement.classList.add("tapete");
 
@@ -163,6 +165,8 @@ function verifyDeath(direction) {
 }
 
 function snakeWalk(direction) {
+  clearInterval(gameLoop);
+
   if (snakeBodyPosition.length <= 0) return;
   if (verifyDeath(direction)) return;
   lastKeyDown = direction;
@@ -209,6 +213,10 @@ function snakeWalk(direction) {
     snakeBodyPosition.push(boardFoodPosition);
     repositionFood();
   }
+
+  gameLoop = setInterval(() => {
+    snakeWalk(lastKeyDown);
+  }, 200 - points * 0.5);
 }
 
 function handleKey(event) {
@@ -237,6 +245,8 @@ function stopReadKey() {
 }
 
 function restartGame() {
+  clearInterval(gameLoop);
+
   table.innerHTML = "";
   pointsPlacar.textContent = "0";
   stopReadKey();
@@ -249,7 +259,7 @@ function restartGame() {
   startGame();
 }
 
-async function startGame() {
+function startGame() {
   createTable();
   readKey();
 }
